@@ -48,12 +48,12 @@ main{max-width:1120px;margin:auto;padding:30px 20px 55px}.hero{display:grid;grid
       <h4>Wi-Fi Car / NodeMCU</h4>
       <p>Install Weryt's tested firmware for an ESP8266-based car. The firmware binary and manifest must match your exact board and wiring.</p>
       <div class="bottom">
-        <esp-web-install-button manifest="./firmware/esp8266-car-manifest.json">
+        <esp-web-install-button manifest="./esp8266-car-manifest.json">
           <button slot="activate" class="btn">Connect &amp; Install</button>
           <span slot="unsupported" class="status">Use a compatible desktop Chrome or Edge browser with Web Serial support.</span>
           <span slot="not-allowed" class="status">Open this site through HTTPS (or localhost for development) to connect to USB.</span>
         </esp-web-install-button>
-        <a class="btn secondary" style="margin-top:8px" href="./arduino/ESP8266_WiFi_Car.ino" download>Download starter .ino code</a>
+        <a class="btn secondary" style="margin-top:8px" href="./ESP8266_WiFi_Car.ino" download>Download starter .ino code</a>
         <div class="small">Installer is not live until the placeholder manifest is replaced with tested firmware.</div>
       </div>
     </article>
