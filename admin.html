@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#155eef">
+  <title>Admin Dashboard | Weryt Solutions</title>
+  <link rel="icon" href="./assets/weryt-logo.png">
+  <link rel="stylesheet" href="./styles.css">
+  <style>
+    body { background:#f4f7fc; }
+    .admin-wrap { max-width:1000px; margin:40px auto; padding:20px; }
+    .admin-card { background:#fff; border:1px solid #e3eaf5; border-radius:18px;
+      padding:28px; margin-bottom:22px; box-shadow:0 8px 28px #163b6810; }
+    .admin-card h1,.admin-card h2 { margin-top:0; color:#12336b; }
+    .admin-form { display:grid; gap:15px; }
+    .admin-form label { display:grid; gap:7px; font-weight:600; color:#253858; }
+    .admin-form input,.admin-form textarea,.admin-form select {
+      box-sizing:border-box; width:100%; padding:12px 13px;
+      border:1px solid #cbd6e7; border-radius:9px; font:inherit; background:white;
+    }
+    .admin-form textarea { min-height:100px; resize:vertical; }
+    .admin-button { border:0; border-radius:9px; padding:12px 18px;
+      font:inherit; font-weight:700; cursor:pointer; background:#155eef; color:white; }
+    .admin-button.secondary { background:#eaf1ff; color:#155eef; }
+    .admin-button.danger { background:#b42318; }
+    .admin-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+    .admin-status { padding:12px; border-radius:9px; background:#eff6ff;
+      color:#174ea6; overflow-wrap:anywhere; }
+    .admin-project { border:1px solid #e3eaf5; border-radius:12px; padding:16px; margin-top:12px; }
+    .admin-project h3 { margin:0 0 8px; }
+    .admin-muted { color:#63738a; line-height:1.6; }
+    [hidden] { display:none !important; }
+    @media(max-width:600px) { .admin-card { padding:19px; } .admin-wrap { padding:12px; } }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <a href="./index.html" aria-label="Weryt Solutions home">
+        <img src="./assets/weryt-logo.png" alt="Weryt Solutions" style="max-width:150px;max-height:55px;object-fit:contain">
+      </a>
+      <a href="./index.html">← View Project Library</a>
+    </div>
+  </header>
+
+  <main class="admin-wrap">
+    <section class="admin-card">
+      <h1>Weryt Project Manager</h1>
+      <p class="admin-muted">Manage your electronics, IoT, automation and smart-system projects from one place.</p>
+      <div id="admin-status" class="admin-status" role="status" aria-live="polite">
+        Connecting to the project database…
+      </div>
+    </section>
+
+    <section id="login-section" class="admin-card" hidden>
+      <h2>Admin Login</h2>
+      <p class="admin-muted">Sign in using the admin account you created in Supabase Authentication.</p>
+      <form id="login-form" class="admin-form">
+        <label>Email
+          <input id="login-email" type="email" autocomplete="username" required>
+        </label>
+        <label>Password
+          <input id="login-password" type="password" autocomplete="current-password" required>
+        </label>
+        <button class="admin-button" type="submit">Sign In</button>
+      </form>
+    </section>
+
+    <section id="dashboard-section" hidden>
+      <section class="admin-card">
+        <h2>Dashboard</h2>
+        <p id="admin-email" class="admin-muted"></p>
+        <div class="admin-actions">
+          <button id="new-project-button" class="admin-button" type="button">＋ New Project</button>
+          <button id="refresh-projects-button" class="admin-button secondary" type="button">Refresh Projects</button>
+          <button id="logout-button" class="admin-button secondary" type="button">Sign Out</button>
+        </div>
+      </section>
+
+      <section id="project-form-section" class="admin-card" hidden>
+        <h2 id="project-form-heading">Create Project</h2>
+        <p class="admin-muted">The project editor will be enabled in the next setup step.</p>
+        <div class="admin-status">
+          Login is ready. Next, we'll connect the editor to the database and add project fields, media uploads and publishing controls.
+        </div>
+      </section>
+
+      <section class="admin-card">
+        <h2>Your Projects</h2>
+        <p class="admin-muted">Drafts are visible to admins only. Published projects appear in the public library.</p>
+        <div id="admin-project-list">Loading projects…</div>
+      </section>
+    </section>
+  </main>
+
+  <script src="./config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="./admin.js"></script>
+</body>
+</html>
