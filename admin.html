@@ -4,40 +4,38 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#155eef">
-  <title>Admin Dashboard | Weryt Solutions</title>
+  <title>Weryt Admin Dashboard</title>
   <link rel="icon" href="./assets/weryt-logo.png">
   <link rel="stylesheet" href="./styles.css">
   <style>
-    body { background:#f4f7fc; }
-    .admin-wrap { max-width:1000px; margin:40px auto; padding:20px; }
-    .admin-card { background:#fff; border:1px solid #e3eaf5; border-radius:18px;
-      padding:28px; margin-bottom:22px; box-shadow:0 8px 28px #163b6810; }
-    .admin-card h1,.admin-card h2 { margin-top:0; color:#12336b; }
-    .admin-form { display:grid; gap:15px; }
-    .admin-form label { display:grid; gap:7px; font-weight:600; color:#253858; }
-    .admin-form input,.admin-form textarea,.admin-form select {
-      box-sizing:border-box; width:100%; padding:12px 13px;
-      border:1px solid #cbd6e7; border-radius:9px; font:inherit; background:white;
-    }
-    .admin-form textarea { min-height:100px; resize:vertical; }
-    .admin-button { border:0; border-radius:9px; padding:12px 18px;
-      font:inherit; font-weight:700; cursor:pointer; background:#155eef; color:white; }
-    .admin-button.secondary { background:#eaf1ff; color:#155eef; }
-    .admin-button.danger { background:#b42318; }
-    .admin-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
-    .admin-status { padding:12px; border-radius:9px; background:#eff6ff;
-      color:#174ea6; overflow-wrap:anywhere; }
-    .admin-project { border:1px solid #e3eaf5; border-radius:12px; padding:16px; margin-top:12px; }
-    .admin-project h3 { margin:0 0 8px; }
-    .admin-muted { color:#63738a; line-height:1.6; }
-    [hidden] { display:none !important; }
-    @media(max-width:600px) { .admin-card { padding:19px; } .admin-wrap { padding:12px; } }
+    body{background:#f4f7fc}
+    .admin-wrap{max-width:1050px;margin:35px auto;padding:18px}
+    .admin-card{background:#fff;border:1px solid #e1e9f5;border-radius:16px;padding:25px;margin-bottom:20px;box-shadow:0 6px 24px #173b6810}
+    .admin-card h1,.admin-card h2{margin-top:0;color:#12336b}
+    .admin-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .field{display:grid;gap:7px;font-weight:600;color:#253858;min-width:0}
+    .field.full{grid-column:1/-1}
+    .field input,.field textarea,.field select{box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd6e7;border-radius:9px;font:inherit;background:#fff}
+    .field textarea{min-height:110px;resize:vertical}
+    .field small{font-weight:400;color:#63738a;line-height:1.5}
+    .admin-button{border:0;border-radius:9px;padding:12px 17px;font:inherit;font-weight:700;cursor:pointer;background:#155eef;color:white}
+    .admin-button:disabled{opacity:.6;cursor:wait}
+    .secondary{background:#eaf1ff;color:#155eef}
+    .danger{background:#b42318;color:#fff}
+    .admin-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:17px}
+    .admin-status{padding:13px;border-radius:9px;background:#eff6ff;color:#174ea6;overflow-wrap:anywhere;line-height:1.5}
+    .admin-project{border:1px solid #e1e9f5;border-radius:12px;padding:16px;margin-top:12px}
+    .admin-project h3{margin:0 0 8px}
+    .muted{color:#63738a;line-height:1.6}
+    .badge{display:inline-block;padding:4px 9px;border-radius:20px;background:#eaf1ff;color:#174ea6;font-size:.85rem}
+    [hidden]{display:none!important}
+    @media(max-width:650px){.admin-form{grid-template-columns:1fr}.field.full{grid-column:auto}.admin-card{padding:18px}.admin-wrap{padding:10px}}
   </style>
 </head>
 <body>
   <header class="site-header">
     <div class="container">
-      <a href="./index.html" aria-label="Weryt Solutions home">
+      <a href="./index.html" aria-label="Weryt home">
         <img src="./assets/weryt-logo.png" alt="Weryt Solutions" style="max-width:150px;max-height:55px;object-fit:contain">
       </a>
       <a href="./index.html">← View Project Library</a>
@@ -47,48 +45,140 @@
   <main class="admin-wrap">
     <section class="admin-card">
       <h1>Weryt Project Manager</h1>
-      <p class="admin-muted">Manage your electronics, IoT, automation and smart-system projects from one place.</p>
-      <div id="admin-status" class="admin-status" role="status" aria-live="polite">
-        Connecting to the project database…
-      </div>
+      <p class="muted">Create and manage your electronics, IoT, automation and smart-system projects.</p>
+      <div id="admin-status" class="admin-status" role="status" aria-live="polite">Connecting…</div>
     </section>
 
     <section id="login-section" class="admin-card" hidden>
       <h2>Admin Login</h2>
-      <p class="admin-muted">Sign in using the admin account you created in Supabase Authentication.</p>
+      <p class="muted">Sign in with your registered portal-admin account.</p>
       <form id="login-form" class="admin-form">
-        <label>Email
+        <label class="field full">Email
           <input id="login-email" type="email" autocomplete="username" required>
         </label>
-        <label>Password
+        <label class="field full">Password
           <input id="login-password" type="password" autocomplete="current-password" required>
         </label>
-        <button class="admin-button" type="submit">Sign In</button>
+        <div class="field full"><button class="admin-button" type="submit">Sign In</button></div>
       </form>
     </section>
 
     <section id="dashboard-section" hidden>
       <section class="admin-card">
         <h2>Dashboard</h2>
-        <p id="admin-email" class="admin-muted"></p>
+        <p id="admin-email" class="muted"></p>
         <div class="admin-actions">
           <button id="new-project-button" class="admin-button" type="button">＋ New Project</button>
-          <button id="refresh-projects-button" class="admin-button secondary" type="button">Refresh Projects</button>
+          <button id="refresh-projects-button" class="admin-button secondary" type="button">Refresh</button>
           <button id="logout-button" class="admin-button secondary" type="button">Sign Out</button>
         </div>
       </section>
 
       <section id="project-form-section" class="admin-card" hidden>
         <h2 id="project-form-heading">Create Project</h2>
-        <p class="admin-muted">The project editor will be enabled in the next setup step.</p>
-        <div class="admin-status">
-          Login is ready. Next, we'll connect the editor to the database and add project fields, media uploads and publishing controls.
-        </div>
+        <p class="muted">Fill in the project details. Array fields below must contain valid JSON.</p>
+
+        <form id="project-form" class="admin-form">
+          <label class="field">Project Title *
+            <input id="p-title" maxlength="150" required placeholder="e.g. Wi-Fi Controlled Car">
+          </label>
+
+          <label class="field">URL Slug *
+            <input id="p-slug" maxlength="170" required pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="wifi-controlled-car">
+            <small>Auto-created from the title. Use lowercase letters, numbers and hyphens.</small>
+          </label>
+
+          <label class="field">Category *
+            <select id="p-category" required>
+              <option>Electronics</option>
+              <option>IoT</option>
+              <option>Automation</option>
+              <option>Smart Systems</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label class="field">Difficulty
+            <select id="p-difficulty">
+              <option>Beginner</option>
+              <option>Intermediate</option>
+              <option>Advanced</option>
+            </select>
+          </label>
+
+          <label class="field">Board / Controller
+            <input id="p-board" placeholder="e.g. Arduino UNO, ESP8266">
+          </label>
+
+          <label class="field">Estimated Time (minutes)
+            <input id="p-minutes" type="number" min="1" max="10000" value="60">
+          </label>
+
+          <label class="field full">Short Summary *
+            <textarea id="p-summary" maxlength="500" required placeholder="A short description shown on the project card."></textarea>
+          </label>
+
+          <label class="field full">Full Description
+            <textarea id="p-description" placeholder="Explain what the project does, how it works and what students will learn."></textarea>
+          </label>
+
+          <label class="field full">Components (JSON array)
+            <textarea id="p-components">[
+  {"name":"ESP8266 development board","quantity":"1","notes":"Main controller"}
+]</textarea>
+            <small>Example: [{"name":"LED","quantity":"1","notes":"Any standard LED"}]</small>
+          </label>
+
+          <label class="field full">Instructions (JSON array)
+            <textarea id="p-instructions">[
+  {"title":"Prepare the components","content":"Collect all the listed components."},
+  {"title":"Make the connections","content":"Follow the pin connection table before powering the circuit."}
+]</textarea>
+            <small>Each step can use a title and content.</small>
+          </label>
+
+          <label class="field full">Pin Connections (JSON array)
+            <textarea id="p-connections">[
+  {"component":"LED","pin":"Anode","board_pin":"D1","notes":"Use an appropriate current-limiting resistor"}
+]</textarea>
+            <small>Example fields: component, pin, board_pin, notes.</small>
+          </label>
+
+          <label class="field full">Troubleshooting (JSON array)
+            <textarea id="p-troubleshooting">[
+  {"problem":"Circuit does not turn on","solution":"Check the power supply, wiring and common ground."}
+]</textarea>
+            <small>Example fields: problem and solution.</small>
+          </label>
+
+          <label class="field full">Cover Image Path (optional)
+            <input id="p-cover" placeholder="e.g. wifi-car/cover.jpg">
+            <small>For now, enter a path inside the public project-media bucket. Image upload comes next.</small>
+          </label>
+
+          <label class="field full">Circuit Diagram Path (optional)
+            <input id="p-circuit" placeholder="e.g. wifi-car/circuit.png">
+          </label>
+
+          <label class="field full">Publication
+            <select id="p-published">
+              <option value="false">Save as Draft — hidden from public</option>
+              <option value="true">Publish — visible in public library</option>
+            </select>
+          </label>
+
+          <div class="field full">
+            <div class="admin-actions">
+              <button id="save-project-button" class="admin-button" type="submit">Save Project</button>
+              <button id="cancel-project-button" class="admin-button secondary" type="button">Cancel</button>
+            </div>
+          </div>
+        </form>
       </section>
 
       <section class="admin-card">
         <h2>Your Projects</h2>
-        <p class="admin-muted">Drafts are visible to admins only. Published projects appear in the public library.</p>
+        <p class="muted">Edit an existing project or review its publication status.</p>
         <div id="admin-project-list">Loading projects…</div>
       </section>
     </section>
