@@ -298,6 +298,9 @@ function listItemText(item) {
   }
 
   
+
+let activeManifestURL = null;
+
 function isESP8266Project(project) {
   const text = [
     project.board,
@@ -314,27 +317,25 @@ function isESP8266Project(project) {
 
   return (
     /esp\s*8266/.test(text) ||
-    /esp\s*12\s*[ef]/.test(text) ||
+    /8266/.test(text) ||
     /nodemcu/.test(text) ||
     /wemos\s*d1/.test(text) ||
-    /8266/.test(text) ||
+    /esp\s*12\s*[ef]/.test(text) ||
     /wifi controlled car/.test(text) ||
     /wi fi controlled car/.test(text)
   );
 }
 
-
-  
 function renderFirmwareInstaller(project) {
   if (!project.firmware_file) return "";
 
   if (!isESP8266Project(project)) {
     return `
       <div class="firmware-installer">
-        <h4>Browser firmware installation</h4>
+        <h4>Browser Firmware Installation</h4>
         <p>
-          Firmware file uploaded hai, lekin board detect nahi hua.
-          Admin dashboard mein Board field ko ESP8266 ya NodeMCU ESP8266 set karo.
+          Board detect nahi hua. Admin dashboard mein Board field ko
+          ESP8266 ya NodeMCU ESP8266 set karo.
         </p>
       </div>
     `;
@@ -342,9 +343,9 @@ function renderFirmwareInstaller(project) {
 
   return `
     <div class="firmware-installer">
-      <h4>Connect & Install Firmware</h4>
+      <h4>Connect &amp; Install Firmware</h4>
       <p>
-        Connect your ESP8266 using a USB data cable.
+        Connect your ESP8266 with a USB data cable.
         Close Arduino IDE Serial Monitor before continuing.
       </p>
 
@@ -352,109 +353,77 @@ function renderFirmwareInstaller(project) {
         <button slot="activate" class="download-button" type="button">
           Connect &amp; Install Firmware
         </button>
+
         <span slot="unsupported">
-          This browser does not support Web Serial. Try desktop Chrome or Edge.
+          Use desktop Chrome or Edge with Web Serial support.
         </span>
+
         <span slot="not-allowed">
-          Open this page over HTTPS.
+          Open this website over HTTPS.
         </span>
       </esp-web-install-button>
 
       <p class="installer-warning">
-        Only flash firmware made for this exact board.
-        Installation may erase existing flash data.
+        Warning: flashing may erase existing data.
+        Use firmware made for this exact board and do not disconnect power
+        during installation.
       </p>
     </div>
   `;
 }
 
+function configureFirmwareInstaller(project) {
+  const installer = document.getElementById(
+    "project-firmware-installer"
+  );
 
-    return `
-      <div class="firmware-installer">
-        <h4>Flash your ESP8266 from the browser</h4>
-
-        <p>
-          Connect your ESP8266 board using a USB data cable.
-          Close Arduino Serial Monitor and other programs using the port.
-        </p>
-
-        <esp-web-install-button id="project-firmware-installer">
-          <button slot="activate" class="download-button" type="button">
-            Connect &amp; Install Firmware
-          </button>
-
-          <span slot="unsupported">
-            Use a supported desktop browser, such as Chrome or Edge,
-            with Web Serial support.
-          </span>
-
-          <span slot="not-allowed">
-            Open this website over HTTPS.
-          </span>
-        </esp-web-install-button>
-
-        <p class="installer-warning">
-          Warning: installation may erase the existing program or settings.
-          Use firmware made specifically for this project and board.
-          Do not disconnect power during flashing.
-        </p>
-      </div>
-    `;
+  if (activeManifestURL) {
+    URL.revokeObjectURL(activeManifestURL);
+    activeManifestURL = null;
   }
 
-  function configureFirmwareInstaller(project) {
-    const installer = document.getElementById("project-firmware-installer");
+  if (
+    !installer ||
+    !project.firmware_file ||
+    !isESP8266Project(project)
+  ) {
+    return;
+  }
 
-    // Release the previous temporary manifest URL.
-    if (activeManifestURL) {
-      URL.revokeObjectURL(activeManifestURL);
-      activeManifestURL = null;
-    }
+  const firmwareURL = getPublicMediaURL(project.firmware_file);
 
-    if (!installer || !project.firmware_file || !isESP8266Project(project)) {
-      return;
-    }
-
-    const firmwareURL = getPublicMediaURL(project.firmware_file);
-
-    if (!firmwareURL) {
-      installer.replaceWith(
-        document.createTextNode("Firmware URL could not be created.")
-      );
-      return;
-    }
-
-    /*
-      This manifest assumes the uploaded .bin is a complete ESP8266
-      flash image intended to be written at offset 0x0.
-      Confirm the binary format before flashing a real board.
-    */
-    const manifest = {
-      name: project.title || "Weryt ESP8266 Project",
-      version: project.firmware_version || "1.0.0",
-      new_install_prompt_erase: true,
-      builds: [
-        {
-          chipFamily: "ESP8266",
-          parts: [
-            {
-              path: firmwareURL,
-              offset: 0
-            }
-          ]
-        }
-      ]
-    };
-
-    const manifestBlob = new Blob(
-      [JSON.stringify(manifest, null, 2)],
-      { type: "application/json" }
+  if (!firmwareURL) {
+    installer.replaceWith(
+      document.createTextNode("Firmware URL could not be created.")
     );
-
-    activeManifestURL = URL.createObjectURL(manifestBlob);
-    installer.setAttribute("manifest", activeManifestURL);
+    return;
   }
 
+  const manifest = {
+    name: project.title || "Weryt ESP8266 Project",
+    version: project.firmware_version || "1.0.0",
+    new_install_prompt_erase: true,
+    builds: [
+      {
+        chipFamily: "ESP8266",
+        parts: [
+          {
+            path: firmwareURL,
+            offset: 0
+          }
+        ]
+      }
+    ]
+  };
+
+  const manifestBlob = new Blob(
+    [JSON.stringify(manifest)],
+    { type: "application/json" }
+  );
+
+  activeManifestURL = URL.createObjectURL(manifestBlob);
+  installer.setAttribute("manifest", activeManifestURL);
+}
   function renderProjectDetail(project) {
     const cover = imageMarkup(project.cover_image, project.title);
     const circuit = imageMarkup(
