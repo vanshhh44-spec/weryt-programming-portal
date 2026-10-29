@@ -6,6 +6,7 @@
   const formSection = $("project-form-section");
   const projectList = $("admin-project-list");
   const form = $("project-form");
+  const loginForm = $("login-form");
 
   let supabase;
   let editingId = null;
