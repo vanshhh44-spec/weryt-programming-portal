@@ -1,0 +1,16 @@
+{
+  "name": "Weryt ESP8266 Wi-Fi Car",
+  "version": "0.1.0",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        {
+          "path": "./esp8266-car.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
