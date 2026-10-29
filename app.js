@@ -299,8 +299,6 @@ function listItemText(item) {
 
   
 
-let activeManifestURL = null;
-
 function isESP8266Project(project) {
   const text = [
     project.board,
