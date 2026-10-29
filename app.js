@@ -58,19 +58,33 @@
     return [];
   }
 
-  function listItemText(item) {
-    if (typeof item === "string") return item;
+ 
+function listItemText(item) {
+  if (typeof item === "string") return item;
 
-    if (item && typeof item === "object") {
-      return item.text ||
-        item.name ||
-        item.instruction ||
-        item.component ||
-        JSON.stringify(item);
+  if (item && typeof item === "object") {
+    if (item.title && item.content) {
+      return `${item.title}: ${item.content}`;
     }
 
-    return String(item ?? "");
+    if (item.problem && item.solution) {
+      return `${item.problem}: ${item.solution}`;
+    }
+
+    return (
+      item.text ||
+      item.name ||
+      item.instruction ||
+      item.component ||
+      item.content ||
+      item.solution ||
+      JSON.stringify(item)
+    );
   }
+
+  return String(item ?? "");
+}
+
 
   function getPublicMediaURL(value) {
     if (!value || typeof value !== "string") return "";
