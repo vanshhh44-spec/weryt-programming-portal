@@ -1,3 +1,4 @@
+
 (() => {
   const $ = id => document.getElementById(id);
   const status = $("admin-status");
@@ -11,6 +12,13 @@
   let supabase;
   let editingId = null;
   let slugWasManuallyEdited = false;
+
+  let existingFiles = {
+    cover_image: null,
+    circuit_image: null,
+    source_file: null,
+    firmware_file: null
+  };
 
   function setStatus(message) {
     status.textContent = message;
@@ -29,7 +37,8 @@
 
   function escapeHTML(value) {
     return String(value ?? "").replace(/[&<>"']/g, ch => ({
-      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      "&": "&amp;", "<": "&lt;", ">": "&gt;",
+      '"': "&quot;", "'": "&#39;"
     })[ch]);
   }
 
@@ -45,24 +54,53 @@
     try {
       value = JSON.parse($(fieldId).value);
     } catch {
-      throw new Error(label + " must be valid JSON. Check commas, quotation marks and brackets.");
+      throw new Error(
+        label + " must be valid JSON. Check commas, quotation marks and brackets."
+      );
     }
     if (!Array.isArray(value)) {
-      throw new Error(label + " must be a JSON array starting with [ and ending with ].");
+      throw new Error(label + " must be a JSON array.");
     }
     return value;
+  }
+
+  function showCurrentFile(spanId, path, label) {
+    const el = $(spanId);
+    if (el) {
+      el.textContent = path
+        ? `${label}: ${path.split("/").pop()} (existing file will be kept unless replaced)`
+        : `No ${label.toLowerCase()} uploaded yet.`;
+    }
+  }
+
+  function updateExistingFileLabels() {
+    showCurrentFile("p-cover-current", existingFiles.cover_image, "Cover image");
+    showCurrentFile("p-circuit-current", existingFiles.circuit_image, "Circuit diagram");
+    showCurrentFile("p-source-current", existingFiles.source_file, "Source file");
+    showCurrentFile("p-firmware-current", existingFiles.firmware_file, "Firmware");
   }
 
   function resetForm() {
     editingId = null;
     slugWasManuallyEdited = false;
+    existingFiles = {
+      cover_image: null,
+      circuit_image: null,
+      source_file: null,
+      firmware_file: null
+    };
+
     form.reset();
+
     $("p-minutes").value = 60;
     $("p-components").value = '[\n  {"name":"ESP8266 development board","quantity":"1","notes":"Main controller"}\n]';
     $("p-instructions").value = '[\n  {"title":"Prepare the components","content":"Collect all the listed components."},\n  {"title":"Make the connections","content":"Follow the pin connection table before powering the circuit."}\n]';
     $("p-connections").value = '[\n  {"component":"LED","pin":"Anode","board_pin":"D1","notes":"Use an appropriate current-limiting resistor"}\n]';
     $("p-troubleshooting").value = '[\n  {"problem":"Circuit does not turn on","solution":"Check the power supply, wiring and common ground."}\n]';
     $("p-published").value = "false";
+    $("p-firmware-version").value = "1.0.0";
+
+    updateExistingFileLabels();
     $("project-form-heading").textContent = "Create Project";
     $("save-project-button").textContent = "Save Project";
   }
@@ -77,6 +115,7 @@
   function fillForm(project) {
     editingId = project.id;
     slugWasManuallyEdited = true;
+
     $("p-title").value = project.title || "";
     $("p-slug").value = project.slug || "";
     $("p-category").value = project.category || "Other";
@@ -89,13 +128,75 @@
     $("p-instructions").value = JSON.stringify(project.instructions || [], null, 2);
     $("p-connections").value = JSON.stringify(project.connections || [], null, 2);
     $("p-troubleshooting").value = JSON.stringify(project.troubleshooting || [], null, 2);
-    $("p-cover").value = project.cover_image || "";
-    $("p-circuit").value = project.circuit_image || "";
+
+    existingFiles = {
+      cover_image: project.cover_image || null,
+      circuit_image: project.circuit_image || null,
+      source_file: project.source_file || null,
+      firmware_file: project.firmware_file || null
+    };
+
+    $("p-firmware-version").value = project.firmware_version || "1.0.0";
+    $("p-firmware-instructions").value = project.firmware_instructions || "";
     $("p-published").value = String(Boolean(project.published));
+
+    // File inputs cannot be pre-filled by the browser.
+    ["p-cover-upload", "p-circuit-upload", "p-source-upload", "p-firmware-upload"]
+      .forEach(id => { if ($(id)) $(id).value = ""; });
+
+    updateExistingFileLabels();
+
     $("project-form-heading").textContent = "Edit Project";
     $("save-project-button").textContent = "Update Project";
     formSection.hidden = false;
     formSection.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function extensionOf(file) {
+    return (file.name.match(/\.([a-z0-9]+)$/i)?.[1] || "").toLowerCase();
+  }
+
+  async function uploadSelectedFile(inputId, folder, allowedExtensions, maxMB, slug) {
+    const input = $(inputId);
+    const file = input?.files?.[0];
+
+    if (!file) return null;
+
+    const ext = extensionOf(file);
+
+    if (!allowedExtensions.includes(ext)) {
+      throw new Error(
+        `File "${file.name}" has an unsupported extension. Allowed: ${allowedExtensions.join(", ")}.`
+      );
+    }
+
+    if (file.size > maxMB * 1024 * 1024) {
+      throw new Error(`File "${file.name}" exceeds the ${maxMB} MB limit.`);
+    }
+
+    const safeSlug = slugify(slug);
+    const uniqueId = globalThis.crypto?.randomUUID
+      ? globalThis.crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const path = `projects/${safeSlug}/${folder}-${uniqueId}.${ext}`;
+
+    setStatus(`Uploading ${file.name}…`);
+
+    const options = {
+      cacheControl: "3600",
+      upsert: false
+    };
+
+    if (file.type) options.contentType = file.type;
+
+    const { error } = await supabase.storage
+      .from("project-media")
+      .upload(path, file, options);
+
+    if (error) throw error;
+
+    return path;
   }
 
   async function loadProjects() {
@@ -103,7 +204,7 @@
 
     const { data, error } = await supabase
       .from("projects")
-      .select("id,slug,title,summary,category,difficulty,board,estimated_minutes,components,instructions,connections,troubleshooting,cover_image,circuit_image,published,updated_at")
+      .select("id,slug,title,summary,category,difficulty,board,estimated_minutes,components,instructions,connections,troubleshooting,cover_image,circuit_image,source_file,firmware_file,manifest_file,firmware_version,firmware_instructions,published,updated_at")
       .order("updated_at", { ascending: false });
 
     if (error) {
@@ -142,9 +243,11 @@
       button.addEventListener("click", async () => {
         const nextValue = button.dataset.published !== "true";
         const action = nextValue ? "publish" : "unpublish";
+
         if (!confirm(`Are you sure you want to ${action} this project?`)) return;
 
         button.disabled = true;
+
         const { error } = await supabase
           .from("projects")
           .update({ published: nextValue, updated_at: new Date().toISOString() })
@@ -166,6 +269,7 @@
         if (!confirm("Delete this project permanently? This cannot be undone.")) return;
 
         button.disabled = true;
+
         const { error } = await supabase
           .from("projects")
           .delete()
@@ -178,10 +282,12 @@
         }
 
         setStatus("Project deleted.");
+
         if (editingId === button.dataset.delete) {
           formSection.hidden = true;
           resetForm();
         }
+
         await loadProjects();
       });
     });
@@ -225,7 +331,7 @@
 
     const saveButton = $("save-project-button");
     saveButton.disabled = true;
-    setStatus("Saving project…");
+    setStatus("Preparing project…");
 
     try {
       const title = $("p-title").value.trim();
@@ -240,9 +346,31 @@
       }
 
       const minutes = Number($("p-minutes").value || 60);
+
       if (!Number.isInteger(minutes) || minutes < 1 || minutes > 10000) {
         throw new Error("Estimated time must be a whole number between 1 and 10000 minutes.");
       }
+
+      // Upload newly selected files; otherwise preserve existing file paths.
+      const coverPath = await uploadSelectedFile(
+        "p-cover-upload", "cover",
+        ["png", "jpg", "jpeg", "webp"], 8, slug
+      ) || existingFiles.cover_image;
+
+      const circuitPath = await uploadSelectedFile(
+        "p-circuit-upload", "circuit",
+        ["png", "jpg", "jpeg", "webp"], 12, slug
+      ) || existingFiles.circuit_image;
+
+      const sourcePath = await uploadSelectedFile(
+        "p-source-upload", "source",
+        ["ino", "cpp", "h", "c", "py", "js", "zip", "txt", "json"], 20, slug
+      ) || existingFiles.source_file;
+
+      const firmwarePath = await uploadSelectedFile(
+        "p-firmware-upload", "firmware",
+        ["bin", "hex", "uf2", "zip"], 25, slug
+      ) || existingFiles.firmware_file;
 
       const payload = {
         title,
@@ -257,11 +385,17 @@
         instructions: parseArray("p-instructions", "Instructions"),
         connections: parseArray("p-connections", "Pin Connections"),
         troubleshooting: parseArray("p-troubleshooting", "Troubleshooting"),
-        cover_image: $("p-cover").value.trim() || null,
-        circuit_image: $("p-circuit").value.trim() || null,
+        cover_image: coverPath || null,
+        circuit_image: circuitPath || null,
+        source_file: sourcePath || null,
+        firmware_file: firmwarePath || null,
+        firmware_version: $("p-firmware-version").value.trim() || "1.0.0",
+        firmware_instructions: $("p-firmware-instructions").value.trim(),
         published: $("p-published").value === "true",
         updated_at: new Date().toISOString()
       };
+
+      setStatus("Saving project details…");
 
       if (editingId) {
         const { error } = await supabase
@@ -270,6 +404,7 @@
           .eq("id", editingId);
 
         if (error) throw error;
+
         setStatus("Project updated successfully.");
       } else {
         const { error } = await supabase
@@ -277,6 +412,7 @@
           .insert(payload);
 
         if (error) throw error;
+
         setStatus(payload.published
           ? "Project created and published."
           : "Project saved as a draft.");
@@ -314,6 +450,7 @@
 
     loginForm.addEventListener("submit", async event => {
       event.preventDefault();
+
       const button = loginForm.querySelector('button[type="submit"]');
       button.disabled = true;
       setStatus("Signing in…");
@@ -351,7 +488,9 @@
     });
 
     $("p-title").addEventListener("input", () => {
-      if (!slugWasManuallyEdited) $("p-slug").value = slugify($("p-title").value);
+      if (!slugWasManuallyEdited) {
+        $("p-slug").value = slugify($("p-title").value);
+      }
     });
 
     $("p-slug").addEventListener("input", () => {
