@@ -151,14 +151,40 @@
             <small>Example fields: problem and solution.</small>
           </label>
 
-          <label class="field full">Cover Image Path (optional)
-            <input id="p-cover" placeholder="e.g. wifi-car/cover.jpg">
-            <small>For now, enter a path inside the public project-media bucket. Image upload comes next.</small>
-          </label>
+          <label class="field full">Cover Image
+  <input id="p-cover-upload" type="file" accept="image/png,image/jpeg,image/webp">
+  <small>PNG, JPG or WebP. Recommended: landscape image, 1200 × 675 px.</small>
+  <span id="p-cover-current" class="muted">No image selected.</span>
+</label>
 
-          <label class="field full">Circuit Diagram Path (optional)
-            <input id="p-circuit" placeholder="e.g. wifi-car/circuit.png">
-          </label>
+<label class="field full">Circuit Diagram
+  <input id="p-circuit-upload" type="file" accept="image/png,image/jpeg,image/webp">
+  <small>Upload a clear wiring diagram. PNG is recommended for circuit labels.</small>
+  <span id="p-circuit-current" class="muted">No diagram selected.</span>
+</label>
+
+<label class="field full">Source Code File (optional)
+  <input id="p-source-upload" type="file"
+    accept=".ino,.cpp,.h,.c,.py,.js,.zip,.txt,.json">
+  <small>For example: Arduino .ino file, Python script or a ZIP of project files.</small>
+  <span id="p-source-current" class="muted">No source file selected.</span>
+</label>
+
+<label class="field full">Ready-to-Flash Firmware (optional)
+  <input id="p-firmware-upload" type="file" accept=".bin,.hex,.uf2,.zip">
+  <small>Upload only firmware tested for the specified board. Students will be able to download published firmware without logging in.</small>
+  <span id="p-firmware-current" class="muted">No firmware selected.</span>
+</label>
+
+<label class="field">Firmware Version
+  <input id="p-firmware-version" maxlength="40" value="1.0.0" placeholder="1.0.0">
+</label>
+
+<label class="field full">Firmware Installation Instructions
+  <textarea id="p-firmware-instructions"
+    placeholder="Explain the board, flashing tool, connection method and installation steps."></textarea>
+  <small>Leave blank if the project does not have ready-to-flash firmware.</small>
+</label>
 
           <label class="field full">Publication
             <select id="p-published">
