@@ -252,9 +252,40 @@
 
       ${renderSection("Troubleshooting", troubleshooting)}
 
-      ${renderSection("Code and firmware", `
-        <p>Downloads and firmware installation will be available when the files have been configured for this project.</p>
-      `)}
+      
+${renderSection("Code and firmware", `
+  <div class="download-list">
+    ${project.source_file ? `
+      <a class="download-button" href="${escapeHTML(getPublicMediaURL(project.source_file))}?download" target="_blank" rel="noopener">
+        ↓ Download Source Code
+      </a>
+    ` : ""}
+
+    ${project.firmware_file ? `
+      <a class="download-button" href="${escapeHTML(getPublicMediaURL(project.firmware_file))}?download" target="_blank" rel="noopener">
+        ↓ Download Firmware
+      </a>
+    ` : ""}
+
+    ${project.manifest_file ? `
+      <a class="download-button" href="${escapeHTML(getPublicMediaURL(project.manifest_file))}?download" target="_blank" rel="noopener">
+        ↓ Download Manifest
+      </a>
+    ` : ""}
+
+    ${!project.source_file && !project.firmware_file && !project.manifest_file
+      ? "<p>No downloads available for this project yet.</p>"
+      : ""}
+  </div>
+
+  ${project.firmware_instructions ? `
+    <div class="firmware-instructions">
+      <h4>Firmware installation instructions</h4>
+      <p>${escapeHTML(project.firmware_instructions).replace(/\n/g, "<br>")}</p>
+    </div>
+  ` : ""}
+`)}
+
     `;
 
     if (typeof dialog.showModal === "function") {
