@@ -681,3 +681,39 @@ a {
 .firmware-instructions h4 {
   margin-top: 0;
 }
+
+
+
+.firmware-installer {
+  margin-top: 22px;
+  padding: 20px;
+  border: 1px solid #dbe5f2;
+  border-radius: 14px;
+  background: #f5f8fd;
+}
+
+.firmware-installer h4 {
+  margin-top: 0;
+}
+
+.firmware-installer p {
+  line-height: 1.65;
+}
+
+.firmware-installer esp-web-install-button {
+  display: inline-block;
+  margin: 10px 0;
+  --esp-tools-button-color: #1769e0;
+  --esp-tools-button-text-color: #ffffff;
+  --esp-tools-button-border-radius: 10px;
+}
+
+.installer-warning,
+.installer-note {
+  color: #6b4d12;
+  font-size: 0.9rem;
+}
+
+.installer-warning {
+  margin-bottom: 0;
+}
