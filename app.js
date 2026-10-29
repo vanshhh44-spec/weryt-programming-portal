@@ -297,30 +297,77 @@ function listItemText(item) {
     `;
   }
 
-  function isESP8266Project(project) {
-    const board = String(project.board || "").toLowerCase();
+  
+function isESP8266Project(project) {
+  const text = [
+    project.board,
+    project.title,
+    project.slug,
+    project.category,
+    project.summary,
+    project.description
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase()
+    .replace(/[_-]+/g, " ");
 
-    return (
-      board.includes("esp8266") ||
-      board.includes("nodemcu") ||
-      board.includes("esp-12e") ||
-      board.includes("esp-12f") ||
-      board.includes("wemos d1")
-    );
+  return (
+    /esp\s*8266/.test(text) ||
+    /esp\s*12\s*[ef]/.test(text) ||
+    /nodemcu/.test(text) ||
+    /wemos\s*d1/.test(text) ||
+    /8266/.test(text) ||
+    /wifi controlled car/.test(text) ||
+    /wi fi controlled car/.test(text)
+  );
+}
+
+
+  
+function renderFirmwareInstaller(project) {
+  if (!project.firmware_file) return "";
+
+  if (!isESP8266Project(project)) {
+    return `
+      <div class="firmware-installer">
+        <h4>Browser firmware installation</h4>
+        <p>
+          Firmware file uploaded hai, lekin board detect nahi hua.
+          Admin dashboard mein Board field ko ESP8266 ya NodeMCU ESP8266 set karo.
+        </p>
+      </div>
+    `;
   }
 
-  function renderFirmwareInstaller(project) {
-    if (!project.firmware_file) return "";
+  return `
+    <div class="firmware-installer">
+      <h4>Connect & Install Firmware</h4>
+      <p>
+        Connect your ESP8266 using a USB data cable.
+        Close Arduino IDE Serial Monitor before continuing.
+      </p>
 
-    if (!isESP8266Project(project)) {
-      return `
-        <p class="installer-warning">
-          Browser installation is currently configured for ESP8266 boards.
-          Download the firmware for other boards and use their compatible
-          flashing tool.
-        </p>
-      `;
-    }
+      <esp-web-install-button id="project-firmware-installer">
+        <button slot="activate" class="download-button" type="button">
+          Connect &amp; Install Firmware
+        </button>
+        <span slot="unsupported">
+          This browser does not support Web Serial. Try desktop Chrome or Edge.
+        </span>
+        <span slot="not-allowed">
+          Open this page over HTTPS.
+        </span>
+      </esp-web-install-button>
+
+      <p class="installer-warning">
+        Only flash firmware made for this exact board.
+        Installation may erase existing flash data.
+      </p>
+    </div>
+  `;
+}
+
 
     return `
       <div class="firmware-installer">
