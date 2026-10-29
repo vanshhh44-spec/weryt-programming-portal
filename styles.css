@@ -641,3 +641,43 @@ a {
     padding: 25px 18px;
   }
 }
+
+
+
+.download-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.download-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border-radius: 10px;
+  background: #1769e0;
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.download-button:hover {
+  background: #1054ba;
+  transform: translateY(-2px);
+}
+
+.firmware-instructions {
+  margin-top: 20px;
+  padding: 16px;
+  border: 1px solid #dbe5f2;
+  border-radius: 12px;
+  background: #f5f8fd;
+  line-height: 1.7;
+}
+
+.firmware-instructions h4 {
+  margin-top: 0;
+}
